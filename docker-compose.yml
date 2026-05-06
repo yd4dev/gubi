@@ -1,0 +1,12 @@
+services:
+    gubi:
+        build: .
+        container_name: gubi-bot
+        restart: unless-stopped
+        env_file:
+            - .env
+        environment:
+            - BOT_TOKEN=${BOT_TOKEN}
+            - DEV_GUILD=${DEV_GUILD}
+        volumes:
+            - ./data:/app/data
