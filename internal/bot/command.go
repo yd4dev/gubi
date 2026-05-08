@@ -15,7 +15,7 @@ type Command interface {
 	Handler(event *events.ApplicationCommandInteractionCreate) error
 }
 
-func Register(command Command) {
+func RegisterCommand(command Command) {
 	RegisteredCommands = append(RegisteredCommands, command)
 	DiscordApplicationCommandCreates = append(DiscordApplicationCommandCreates, command.Definition())
 }

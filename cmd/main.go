@@ -11,6 +11,7 @@ import (
 	_ "github.com/yd4dev/gubi/internal/commands"
 	"github.com/yd4dev/gubi/internal/config"
 	"github.com/yd4dev/gubi/internal/database"
+	_ "github.com/yd4dev/gubi/internal/handlers"
 
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
@@ -46,6 +47,7 @@ func main() {
 		),
 		bot.WithEventListeners(&events.ListenerAdapter{
 			OnApplicationCommandInteraction: gubiBot.CommandHandler,
+			OnComponentInteraction:          gubiBot.ComponentInteractionHandler,
 		}),
 	)
 	if err != nil {
