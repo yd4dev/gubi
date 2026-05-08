@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 )
 
@@ -20,9 +21,11 @@ func ComponentInteractionHandler(event *events.ComponentInteractionCreate) {
 		if strings.HasPrefix(event.Data.CustomID(), prefix) {
 			if err := handler(event); err != nil {
 				slog.Error("Error occured while handling component interaction.", slog.String("eventID", event.Data.CustomID()), slog.Any("err", err))
+				event.CreateMessage(discord.NewMessageCreate().WithContent("An error occured.").WithEphemeral(true))
 			}
 			return
 		}
 	}
 	slog.Error("No handler was found for component interaction.", slog.String("eventID", event.Data.CustomID()))
+	event.CreateMessage(discord.NewMessageCreate().WithContent("An error occured.").WithEphemeral(true))
 }

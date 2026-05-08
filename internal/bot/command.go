@@ -25,6 +25,7 @@ func CommandHandler(event *events.ApplicationCommandInteractionCreate) {
 		if cmd.Definition().CommandName() == event.Data.CommandName() {
 			if err := cmd.Handler(event); err != nil {
 				slog.Error("Error occured while running command.", slog.String("commandName", cmd.Definition().CommandName()), slog.Any("err", err))
+				event.CreateMessage(discord.NewMessageCreate().WithContent("An error occured.").WithEphemeral(true))
 			}
 			return
 		}
