@@ -55,9 +55,9 @@ func main() {
 		return
 	}
 
-	defer client.Close(context.TODO())
+	defer client.Close(context.Background())
 
-	if err = client.OpenGateway(context.TODO()); err != nil {
+	if err = client.OpenGateway(context.Background()); err != nil {
 		slog.Error("Error while connecting to gateway. Exiting.", slog.Any("err", err))
 		return
 	}

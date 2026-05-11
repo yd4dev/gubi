@@ -15,7 +15,7 @@ func init() {
 
 type AnimeCommand struct{}
 
-func (_ *AnimeCommand) Definition() discord.ApplicationCommandCreate {
+func (*AnimeCommand) Definition() discord.ApplicationCommandCreate {
 	return discord.SlashCommandCreate{
 		Name:        "anime",
 		Description: "Find out a lot about anime!",
@@ -35,7 +35,7 @@ func (_ *AnimeCommand) Definition() discord.ApplicationCommandCreate {
 	}
 }
 
-func (_ *AnimeCommand) Handler(event *events.ApplicationCommandInteractionCreate) error {
+func (*AnimeCommand) Handler(event *events.ApplicationCommandInteractionCreate) error {
 	subCommand := *event.SlashCommandInteractionData().SubCommandName
 
 	switch subCommand {

@@ -13,7 +13,7 @@ func init() {
 
 type KissCommand struct{}
 
-func (_ *KissCommand) Definition() discord.ApplicationCommandCreate {
+func (*KissCommand) Definition() discord.ApplicationCommandCreate {
 	return discord.SlashCommandCreate{
 		Name:        "kiss",
 		Description: "Kiss another member of this server!",
@@ -27,7 +27,7 @@ func (_ *KissCommand) Definition() discord.ApplicationCommandCreate {
 	}
 }
 
-func (_ *KissCommand) Handler(event *events.ApplicationCommandInteractionCreate) error {
+func (*KissCommand) Handler(event *events.ApplicationCommandInteractionCreate) error {
 	kisser := event.Member()
 	kissed, _ := event.SlashCommandInteractionData().OptMember("member")
 
