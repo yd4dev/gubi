@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"strings"
+
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/yd4dev/gubi/internal/database"
@@ -41,6 +43,7 @@ func Kiss(kisserID, kissedID snowflake.ID) (discord.MessageCreate, error) {
 		).WithAccentColor(0xFF6ECF),
 		discord.NewActionRow(
 			discord.NewPrimaryButton("Kiss back", "kiss_"+kissedID.String()+"_"+kisserID.String()).WithEmoji(discord.NewComponentEmoji("❤️")),
+			discord.NewSecondaryButton("Search Anime", "anime_search_"+strings.ReplaceAll(gif.AnimeName, "_", " ")),
 		),
 	).WithFlags(discord.MessageFlagIsComponentsV2), nil
 }
