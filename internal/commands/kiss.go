@@ -16,22 +16,31 @@ type KissCommand struct{}
 func (*KissCommand) Definition() discord.ApplicationCommandCreate {
 	return discord.SlashCommandCreate{
 		Name:        "kiss",
-		Description: "Kiss another member of this server!",
+		Description: "Kiss another user!",
 		Options: []discord.ApplicationCommandOption{
 			discord.ApplicationCommandOptionUser{
-				Name:        "member",
-				Description: "The member you want to kiss.",
+				Name:        "user",
+				Description: "The user you want to kiss.",
 				Required:    true,
 			},
+		},
+		IntegrationTypes: []discord.ApplicationIntegrationType{
+			discord.ApplicationIntegrationTypeGuildInstall,
+			discord.ApplicationIntegrationTypeUserInstall,
+		},
+		Contexts: []discord.InteractionContextType{
+			discord.InteractionContextTypeBotDM,
+			discord.InteractionContextTypeGuild,
+			discord.InteractionContextTypePrivateChannel,
 		},
 	}
 }
 
 func (*KissCommand) Handler(event *events.ApplicationCommandInteractionCreate) error {
-	kisser := event.Member()
-	kissed, _ := event.SlashCommandInteractionData().OptMember("member")
+	kisser := event.User()
+	kissed, _ := event.SlashCommandInteractionData().OptUser("user")
 
-	message, err := shared.Kiss(kisser.User.ID, kissed.User.ID)
+	message, err := shared.Kiss(kisser.ID, kissed.ID)
 	if err != nil {
 		return err
 	}

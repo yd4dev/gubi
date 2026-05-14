@@ -32,6 +32,15 @@ func (*AnimeCommand) Definition() discord.ApplicationCommandCreate {
 				},
 			},
 		},
+		IntegrationTypes: []discord.ApplicationIntegrationType{
+			discord.ApplicationIntegrationTypeGuildInstall,
+			discord.ApplicationIntegrationTypeUserInstall,
+		},
+		Contexts: []discord.InteractionContextType{
+			discord.InteractionContextTypeBotDM,
+			discord.InteractionContextTypeGuild,
+			discord.InteractionContextTypePrivateChannel,
+		},
 	}
 }
 
