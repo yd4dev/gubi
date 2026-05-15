@@ -42,8 +42,8 @@ func Kiss(kisserID, kissedID snowflake.ID) (discord.MessageCreate, error) {
 			discord.NewTextDisplayf("Anime: %s | Total Kisses: %d", gif.AnimeName, kisses.Kisses),
 		).WithAccentColor(0xFF6ECF),
 		discord.NewActionRow(
-			discord.NewPrimaryButton("Kiss back", "kiss_"+kissedID.String()+"_"+kisserID.String()).WithEmoji(discord.NewComponentEmoji("❤️")),
-			discord.NewSecondaryButton("Search Anime", "anime_search_"+strings.ReplaceAll(gif.AnimeName, "_", " ")),
+			discord.NewPrimaryButton("Kiss back", "kiss:"+kissedID.String()+":"+kisserID.String()).WithEmoji(discord.NewComponentEmoji("❤️")),
+			discord.NewSecondaryButton("Search Anime", "anime:search:"+strings.ReplaceAll(gif.AnimeName, ":", " ")),
 		),
 	).WithFlags(discord.MessageFlagIsComponentsV2), nil
 }

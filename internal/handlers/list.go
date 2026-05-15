@@ -10,6 +10,7 @@ import (
 	"github.com/disgoorg/disgo/events"
 	"github.com/yd4dev/gubi/internal/bot"
 	"github.com/yd4dev/gubi/internal/database"
+	"github.com/yd4dev/gubi/internal/shared"
 )
 
 func init() {
@@ -18,9 +19,9 @@ func init() {
 }
 
 func ListHandler(event *events.ComponentInteractionCreate) error {
-	split := strings.Split(event.Data.CustomID(), "_")
+	split := strings.Split(event.Data.CustomID(), ":")
 
-	if len(split) != 3 {
+	if len(split) != 3 && len(split) != 4 {
 		return errors.New("invalid customID format")
 	}
 
@@ -42,9 +43,11 @@ func ListHandler(event *events.ComponentInteractionCreate) error {
 				return event.CreateMessage(bot.ErrorMessage(fmt.Sprintf("Only %s can use this button!", discord.UserMention(checklist.Owner))).WithEphemeral(true))
 			}
 
+			page := split[3]
+
 			return event.Modal(
 				discord.ModalCreate{
-					CustomID: "list_addentrymodal_" + strconv.Itoa(checklistID),
+					CustomID: "list:addentrymodal:" + strconv.Itoa(checklistID) + ":" + page,
 					Title:    "Add Entry to " + checklist.Name,
 					Components: []discord.LayoutComponent{
 						discord.NewLabel("Entry Description",
@@ -77,9 +80,11 @@ func ListHandler(event *events.ComponentInteractionCreate) error {
 				return event.CreateMessage(bot.ErrorMessage(fmt.Sprintf("Only %s can use this button!", discord.UserMention(checklist.Owner))).WithEphemeral(true))
 			}
 
+			page := split[3]
+
 			return event.Modal(
 				discord.ModalCreate{
-					CustomID: "list_editentrymodal_" + strconv.Itoa(entryID),
+					CustomID: "list:editentrymodal:" + strconv.Itoa(entryID) + ":" + page,
 					Title:    "Edit Entry in " + checklist.Name,
 					Components: []discord.LayoutComponent{
 						discord.NewLabel("Entry Description",
@@ -93,14 +98,29 @@ func ListHandler(event *events.ComponentInteractionCreate) error {
 				},
 			)
 		}
+	case "page":
+		{
+			checklistID, err := strconv.Atoi(split[2])
+			if err != nil {
+				return errors.New("invalid checklist ID in customID")
+			}
+
+			page, err := strconv.Atoi(split[3])
+			if err != nil {
+				return errors.New("invalid page number in customID")
+			}
+
+			return event.UpdateMessage(discord.NewMessageUpdateV2(shared.ViewCheckListByID(event.User().ID, uint(checklistID), page).Components...))
+		}
 	}
+
 	return errors.New("Subcommand " + split[1] + " not found.")
 }
 
 func ListModalHandler(event *events.ModalSubmitInteractionCreate) error {
-	split := strings.Split(event.Data.CustomID, "_")
+	split := strings.Split(event.Data.CustomID, ":")
 
-	if len(split) != 3 {
+	if len(split) != 3 && len(split) != 4 {
 		return errors.New("invalid customID format")
 	}
 
@@ -133,7 +153,12 @@ func ListModalHandler(event *events.ModalSubmitInteractionCreate) error {
 				return err
 			}
 
-			return event.CreateMessage(bot.SuccessMessage("Entry added successfully!").WithEphemeral(true))
+			page, err := strconv.Atoi(split[3])
+			if err != nil {
+				page = 1
+			}
+
+			return event.UpdateMessage(discord.NewMessageUpdateV2(shared.ViewCheckList(checklist.Owner, checklist.Name, page).Components...))
 		}
 	case "editentrymodal":
 		{
@@ -178,7 +203,12 @@ func ListModalHandler(event *events.ModalSubmitInteractionCreate) error {
 				return err
 			}
 
-			return event.CreateMessage(bot.SuccessMessage("Entry updated successfully!").WithEphemeral(true))
+			page, err := strconv.Atoi(split[3])
+			if err != nil {
+				page = 1
+			}
+
+			return event.UpdateMessage(discord.NewMessageUpdateV2(shared.ViewCheckList(checklist.Owner, checklist.Name, page).Components...))
 		}
 	}
 

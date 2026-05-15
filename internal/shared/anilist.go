@@ -47,7 +47,7 @@ func DisplayAnime(anime *verniy.Media) discord.MessageCreate {
 		discord.NewContainer(
 			discord.NewMediaGallery(discord.MediaGalleryItem{Media: discord.UnfurledMediaItem{URL: *anime.BannerImage}}),
 			discord.NewSection(discord.NewTextDisplayf("## %s", *anime.Title.English)).
-				WithAccessory(discord.NewSecondaryButton(string(*anime.Status), "anime_statusbutton").WithDisabled(true)),
+				WithAccessory(discord.NewSecondaryButton(string(*anime.Status), "anime:statusbutton").WithDisabled(true)),
 			discord.NewSection(discord.NewTextDisplay(markdownDesc)).
 				WithAccessory(discord.NewSecondaryButton("⭐ "+strconv.Itoa(*anime.AverageScore)+"/100", "anime_scorebutton").WithDisabled(true)),
 		).WithAccentColor(0x0098FF),

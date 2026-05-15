@@ -15,7 +15,7 @@ func init() {
 }
 
 func AnimeHandler(event *events.ComponentInteractionCreate) error {
-	split := strings.Split(event.Data.CustomID(), "_")
+	split := strings.Split(event.Data.CustomID(), ":")
 
 	if len(split) != 3 {
 		return errors.New("invalid customID format")

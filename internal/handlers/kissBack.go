@@ -18,7 +18,7 @@ func init() {
 func KissHandler(event *events.ComponentInteractionCreate) error {
 	kisser := event.User()
 
-	split := strings.Split(event.Data.CustomID(), "_")
+	split := strings.Split(event.Data.CustomID(), ":")
 
 	if len(split) != 3 {
 		return errors.New("invalid customID format")
