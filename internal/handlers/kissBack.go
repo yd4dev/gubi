@@ -16,7 +16,7 @@ func init() {
 }
 
 func KissHandler(event *events.ComponentInteractionCreate) error {
-	kisser := event.Member()
+	kisser := event.User()
 
 	split := strings.Split(event.Data.CustomID(), "_")
 
@@ -36,12 +36,12 @@ func KissHandler(event *events.ComponentInteractionCreate) error {
 		return errors.New("invalid user ID in customID")
 	}
 
-	if kisserID != kisser.User.ID {
+	if kisserID != kisser.ID {
 		event.CreateMessage(discord.NewMessageCreate().WithContentf("Only %s can use this button!", discord.UserMention(kisserID)).WithEphemeral(true))
 		return nil
 	}
 
-	message, err := shared.Kiss(kisser.User.ID, kissedID)
+	message, err := shared.Kiss(kisser.ID, kissedID)
 	if err != nil {
 		return err
 	}
