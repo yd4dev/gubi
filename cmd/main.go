@@ -48,6 +48,7 @@ func main() {
 		bot.WithEventListeners(&events.ListenerAdapter{
 			OnApplicationCommandInteraction: gubiBot.CommandHandler,
 			OnComponentInteraction:          gubiBot.ComponentInteractionHandler,
+			OnModalSubmit:                   gubiBot.ModalInteractionHandler,
 		}),
 	)
 	if err != nil {
