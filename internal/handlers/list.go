@@ -16,6 +16,7 @@ import (
 func init() {
 	bot.RegisterInteractionHandler("list", ListHandler)
 	bot.RegisterModalInteractionHandler("list", ListModalHandler)
+	bot.RegisterAutocompleteHandler("list", ListAutocompleteHandler)
 }
 
 func ListHandler(event *events.ComponentInteractionCreate) error {
@@ -213,4 +214,30 @@ func ListModalHandler(event *events.ModalSubmitInteractionCreate) error {
 	}
 
 	return errors.New("Subcommand " + split[1] + " not found.")
+}
+
+func ListAutocompleteHandler(event *events.AutocompleteInteractionCreate) error {
+	switch *event.Data.SubCommandName {
+	case "view":
+		{
+			name := event.Data.Focused().String()
+
+			checklists := []database.Checklist{}
+
+			if name == "" {
+				database.DB.Where("Owner = ?", event.User().ID).Find(&checklists)
+			} else {
+				database.DB.Where("Owner = ? AND Name LIKE ?", event.User().ID, name+"%").Find(&checklists)
+			}
+
+			result := []discord.AutocompleteChoice{}
+
+			for _, list := range checklists {
+				result = append(result, discord.AutocompleteChoiceString{Name: list.Name, Value: list.Name})
+			}
+
+			return event.AutocompleteResult(result)
+		}
+	}
+	return errors.New("Subcommand " + *event.Data.SubCommandName + " not found.")
 }

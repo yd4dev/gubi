@@ -49,6 +49,7 @@ func main() {
 			OnApplicationCommandInteraction: gubiBot.CommandHandler,
 			OnComponentInteraction:          gubiBot.ComponentInteractionHandler,
 			OnModalSubmit:                   gubiBot.ModalInteractionHandler,
+			OnAutocompleteInteraction:       gubiBot.AutocompleteInteractionHandler,
 		}),
 	)
 	if err != nil {
