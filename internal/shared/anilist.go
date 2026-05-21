@@ -18,6 +18,8 @@ func SearchAnimeByName(name string) (*verniy.Media, error) {
 		1,
 		verniy.MediaFieldBannerImage,
 		verniy.MediaFieldTitle(verniy.MediaTitleFieldEnglish),
+		verniy.MediaFieldTitle(verniy.MediaTitleFieldRomaji),
+		verniy.MediaFieldTitle(verniy.MediaTitleFieldNative),
 		verniy.MediaFieldDescription,
 		verniy.MediaFieldStatus,
 		verniy.MediaFieldAverageScore,
@@ -38,21 +40,60 @@ func SearchAnimeByName(name string) (*verniy.Media, error) {
 
 func DisplayAnime(anime *verniy.Media) discord.MessageCreate {
 
-	markdownDesc, err := htmltomarkdown.ConvertString(*anime.Description)
-	if err != nil {
-		markdownDesc = *anime.Description
+	var description = "No Description"
+	if anime.Description != nil {
+		description = *anime.Description
 	}
 
-	return discord.NewMessageCreateV2(
-		discord.NewContainer(
+	markdownDesc, err := htmltomarkdown.ConvertString(description)
+	if err != nil {
+		markdownDesc = description
+	}
+
+	var title = "No Title"
+
+	if anime.Title.English != nil {
+		title = *anime.Title.English
+	} else if anime.Title.Romaji != nil {
+		title = *anime.Title.Romaji
+	} else if anime.Title.Native != nil {
+		title = *anime.Title.Native
+	}
+
+	container := discord.NewContainer()
+	if anime.BannerImage != nil {
+		container = container.AddComponents(
 			discord.NewMediaGallery(discord.MediaGalleryItem{Media: discord.UnfurledMediaItem{URL: *anime.BannerImage}}),
-			discord.NewSection(discord.NewTextDisplayf("## %s", *anime.Title.English)).
-				WithAccessory(discord.NewSecondaryButton(string(*anime.Status), "anime:statusbutton").WithDisabled(true)),
-			discord.NewSection(discord.NewTextDisplay(markdownDesc)).
-				WithAccessory(discord.NewSecondaryButton("⭐ "+strconv.Itoa(*anime.AverageScore)+"/100", "anime_scorebutton").WithDisabled(true)),
-		).WithAccentColor(0x0098FF),
-		discord.NewActionRow(
-			discord.NewLinkButton("AniList", *anime.SiteURL),
-		),
+		)
+	}
+
+	var status = "Unknown"
+	if anime.Status != nil {
+		status = string(*anime.Status)
+	}
+
+	var score = "?"
+	if anime.AverageScore != nil {
+		score = strconv.Itoa(*anime.AverageScore)
+	}
+
+	container = container.AddComponents(
+		discord.NewSection(discord.NewTextDisplayf("## %s", title)).
+			WithAccessory(discord.NewSecondaryButton(status, "anime:statusbutton").WithDisabled(true)),
+		discord.NewSection(discord.NewTextDisplay(markdownDesc)).
+			WithAccessory(discord.NewSecondaryButton("⭐ "+score+"/100", "anime_scorebutton").WithDisabled(true)),
+	).WithAccentColor(0x0098FF)
+
+	message := discord.NewMessageCreateV2(
+		container,
 	)
+
+	if anime.SiteURL != nil {
+		message = message.AddComponents(
+			discord.NewActionRow(
+				discord.NewLinkButton("AniList", *anime.SiteURL),
+			),
+		)
+	}
+	return message
 }
