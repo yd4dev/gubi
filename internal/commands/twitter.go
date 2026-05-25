@@ -72,19 +72,32 @@ type Size struct {
 
 func (*TwitterCommand) Handler(event *events.ApplicationCommandInteractionCreate) error {
 	url, _ := event.SlashCommandInteractionData().OptString("url")
-	r, err := regexp.Compile(`/status/\d*`)
+	r, err := regexp.Compile(`/status/\d+`)
 	if err != nil {
 		return err
 	}
+
+	event.DeferCreateMessage(true)
 
 	apiUrl := "https://api.vxtwitter.com/Twitter"
 
 	if r.MatchString(url) {
 		apiUrl += r.FindString(url)
+	} else {
+		_, err := event.Client().Rest.CreateFollowupMessage(event.Client().ApplicationID, event.Token(), bot.ErrorMessage("Invalid Twitter URL!"))
+		return err
 	}
 
 	res, err := http.Get(apiUrl)
 	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	contentType := res.Header.Get("Content-Type")
+
+	if contentType != "application/json" {
+		_, err := event.Client().Rest.CreateFollowupMessage(event.Client().ApplicationID, event.Token(), bot.ErrorMessage("Failed to fetch tweet. It might be deleted, private, or the API is down."))
 		return err
 	}
 
@@ -108,8 +121,13 @@ func (*TwitterCommand) Handler(event *events.ApplicationCommandInteractionCreate
 		).WithAccessory(
 			discord.NewLinkButton("Open URL", tweetResponse.TweetURL),
 		),
-		discord.NewTextDisplay(tweetResponse.Text),
 	).WithAccentColor(0x1CA0F1)
+
+	if b, err := regexp.MatchString(`^https://t\.co/\w+$`, tweetResponse.Text); err == nil && !b {
+		container = container.AddComponents(
+			discord.NewTextDisplay(tweetResponse.Text),
+		)
+	}
 
 	var mediaGalleryItems []discord.MediaGalleryItem
 
@@ -131,5 +149,7 @@ func (*TwitterCommand) Handler(event *events.ApplicationCommandInteractionCreate
 		discord.NewTextDisplay(discord.FormattedTimestampMention(tweetResponse.DateEpoch, discord.TimestampStyleShortDateShortTime)),
 	)
 
-	return event.CreateMessage(discord.NewMessageCreateV2().AddComponents(container))
+	event.Client().Rest.CreateFollowupMessage(event.Client().ApplicationID, event.Token(), discord.NewMessageCreate().WithContent("Fetched Tweet."))
+	_, err = event.Client().Rest.CreateFollowupMessage(event.Client().ApplicationID, event.Token(), discord.NewMessageCreateV2().AddComponents(container))
+	return err
 }
